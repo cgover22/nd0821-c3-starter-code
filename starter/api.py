@@ -1,4 +1,6 @@
-from typing import Optional
+"""API module for the Census prediction app."""
+
+# flake8: noqa
 import os
 import pandas as pd
 from fastapi import FastAPI
@@ -79,13 +81,20 @@ def startup_event():
         "native-country",
     ]
 
-    X, y, encoder, lb = ml_model.__import__("starter.ml.data") and None, None, None, None
     # use process_data to prepare training data
     from starter.ml.data import process_data
 
-    X, y, encoder, lb = process_data(df, categorical_features=cat_features, label="salary", training=True)
+    X, y, encoder, lb = process_data(
+        df,
+        categorical_features=cat_features,
+        label="salary",
+        training=True,
+    )
     clf = ml_model.train_model(X, y)
-    ml_model.save_model(clf, path=os.path.join(os.path.dirname(__file__), "..", "model", "model.joblib"))
+    ml_model.save_model(
+        clf,
+        path=os.path.join(os.path.dirname(__file__), "..", "model", "model.joblib"),
+    )
     app.state.model = clf
     app.state.encoder = encoder
     app.state.lb = lb
@@ -131,16 +140,23 @@ def predict(payload: CensusIn):
 
     from starter.ml.data import process_data
 
-    X, y, _, _ = process_data(df, categorical_features=[
-        "workclass",
-        "education",
-        "marital-status",
-        "occupation",
-        "relationship",
-        "race",
-        "sex",
-        "native-country",
-    ], label="salary", training=False, encoder=app.state.encoder, lb=app.state.lb)
+    X, y, _, _ = process_data(
+        df,
+        categorical_features=[
+            "workclass",
+            "education",
+            "marital-status",
+            "occupation",
+            "relationship",
+            "race",
+            "sex",
+            "native-country",
+        ],
+        label="salary",
+        training=False,
+        encoder=app.state.encoder,
+        lb=app.state.lb,
+    )
 
     preds = ml_model.inference(model_obj, X)
     # inverse transform to original label

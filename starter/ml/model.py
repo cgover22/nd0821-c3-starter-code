@@ -2,9 +2,10 @@ from sklearn.metrics import fbeta_score, precision_score, recall_score
 import joblib
 import os
 from sklearn.ensemble import RandomForestClassifier
-import numpy as np
 import pandas as pd
 
+
+# flake8: noqa
 
 def train_model(X_train, y_train):
     """
@@ -22,7 +23,10 @@ def train_model(X_train, y_train):
         Trained machine learning model.
     """
     # Simple RandomForest classifier with sensible defaults
-    clf = RandomForestClassifier(n_estimators=100, random_state=42)
+    clf = RandomForestClassifier(
+        n_estimators=100,
+        random_state=42,
+    )
     clf.fit(X_train, y_train)
     return clf
 
@@ -80,7 +84,14 @@ def save_model(model, path="model/model.joblib"):
     return path
 
 
-def evaluate_slices(model, data: pd.DataFrame, categorical_features, label, encoder=None, lb=None):
+def evaluate_slices(
+    model,
+    data: pd.DataFrame,
+    categorical_features,
+    label,
+    encoder=None,
+    lb=None,
+):
     """Evaluate model performance on slices of the data for each categorical feature.
 
     Returns a dict mapping "feature=value" -> (precision, recall, fbeta)
@@ -89,11 +100,14 @@ def evaluate_slices(model, data: pd.DataFrame, categorical_features, label, enco
     # If encoder/lb provided, use process_data from sibling module to transform
     from starter.ml.data import process_data
 
-    # if encoder/lb not provided we need to fit them on the whole data
+    # If encoder/lb not provided we need to fit them on the whole data
     if encoder is None or lb is None:
-        from starter.ml.data import process_data
-
-        _, _, encoder, lb = process_data(data, categorical_features=categorical_features, label=label, training=True)
+        _, _, encoder, lb = process_data(
+            data,
+            categorical_features=categorical_features,
+            label=label,
+            training=True,
+        )
 
     for cat in categorical_features:
         values = data[cat].dropna().unique()
@@ -101,7 +115,14 @@ def evaluate_slices(model, data: pd.DataFrame, categorical_features, label, enco
             slice_df = data[data[cat] == val]
             if slice_df.shape[0] == 0:
                 continue
-            X_slice, y_slice, _, _ = process_data(slice_df, categorical_features=categorical_features, label=label, training=False, encoder=encoder, lb=lb)
+                X_slice, y_slice, _, _ = process_data(
+                    slice_df,
+                    categorical_features=categorical_features,
+                    label=label,
+                    training=False,
+                    encoder=encoder,
+                    lb=lb,
+                )
             if X_slice.shape[0] == 0:
                 continue
             preds = inference(model, X_slice)
