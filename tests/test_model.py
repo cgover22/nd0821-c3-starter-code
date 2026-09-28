@@ -47,10 +47,20 @@ def test_train_and_inference_roundtrip(tmp_path):
 
 def test_save_model(tmp_path):
     df = make_dummy_data()
-    cat_features = ["workclass", "education", "marital-status", "occupation", 
-                    "relationship", "race", "sex", "native-country"]
-    X, y, encoder, lb = process_data(df, categorical_features=cat_features, 
-                                     label="salary", training=True)
+    cat_features = ["workclass", 
+                    "education", 
+                    "marital-status", 
+                    "occupation", 
+                    "relationship", 
+                    "race", 
+                    "sex", 
+                    "native-country",
+    ]
+    X, y, encoder, lb = process_data(df, 
+                                     categorical_features=cat_features, 
+                                     label="salary", 
+                                     training=True
+                                    )
     clf = model.train_model(X, y)
     out = tmp_path / "out_model.joblib"
     path = model.save_model(clf, path=str(out))
@@ -60,10 +70,20 @@ def test_save_model(tmp_path):
 
 def test_evaluate_slices_returns_entries():
     df = make_dummy_data()
-    cat_features = ["workclass", "education", "marital-status", "occupation", 
-                    "relationship", "race", "sex", "native-country"]
-    X, y, encoder, lb = process_data(df, categorical_features=cat_features, 
-                                     label="salary", training=True)
+    cat_features = ["workclass", 
+                    "education", 
+                    "marital-status", 
+                    "occupation", 
+                    "relationship", 
+                    "race", 
+                    "sex", 
+                    "native-country",
+    ]
+    X, y, encoder, lb = process_data(df, 
+                                     categorical_features=cat_features, 
+                                     label="salary", 
+                                     training=True
+                                    )
     clf = model.train_model(X, y)
     results = model.evaluate_slices(clf, df, categorical_features=cat_features, 
                                     label="salary", encoder=encoder, lb=lb)
