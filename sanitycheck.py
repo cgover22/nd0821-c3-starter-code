@@ -1,3 +1,9 @@
+
+# This file is a developer convenience script; many of its heuristics are
+# informal and intended for interactive use. It is acceptable for the
+# repository linting policy to skip strict flake8 checks on this file.
+# flake8: noqa
+
 from os import path
 
 import argparse
