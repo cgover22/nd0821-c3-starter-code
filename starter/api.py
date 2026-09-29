@@ -1,4 +1,4 @@
-"""API module for the Census prediction app."""
+"""API module for the Census prediction app. """
 
 # flake8: noqa
 import os
