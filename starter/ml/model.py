@@ -115,14 +115,14 @@ def evaluate_slices(
             slice_df = data[data[cat] == val]
             if slice_df.shape[0] == 0:
                 continue
-                X_slice, y_slice, _, _ = process_data(
-                    slice_df,
-                    categorical_features=categorical_features,
-                    label=label,
-                    training=False,
-                    encoder=encoder,
-                    lb=lb,
-                )
+            X_slice, y_slice, _, _ = process_data(
+                slice_df,
+                categorical_features=categorical_features,
+                label=label,
+                training=False,
+                encoder=encoder,
+                lb=lb,
+            )
             if X_slice.shape[0] == 0:
                 continue
             preds = inference(model, X_slice)
