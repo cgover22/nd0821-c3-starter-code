@@ -3,7 +3,10 @@ import os
 import requests
 
 
-API_URL = os.environ.get("LIVE_API_URL", "https://your-live-api-url.herokuapp.com/predict")
+API_URL = os.environ.get(
+    "LIVE_API_URL",
+    "https://your-live-api-url.herokuapp.com/predict",
+)
 
 PAYLOAD = {
     "age": 39,
