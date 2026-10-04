@@ -5,7 +5,7 @@ import os
 import joblib
 import pandas as pd
 from fastapi import FastAPI
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from starter.ml import model as ml_model
 
@@ -14,24 +14,9 @@ app = FastAPI()
 
 
 class CensusIn(BaseModel):
-    age: int
-    workclass: str = Field(..., alias="workclass")
-    fnlgt: int = Field(..., alias="fnlgt")
-    education: str = Field(..., alias="education")
-    education_num: int = Field(..., alias="education-num")
-    marital_status: str = Field(..., alias="marital-status")
-    occupation: str = Field(..., alias="occupation")
-    relationship: str = Field(..., alias="relationship")
-    race: str = Field(..., alias="race")
-    sex: str = Field(..., alias="sex")
-    capital_gain: int = Field(..., alias="capital-gain")
-    capital_loss: int = Field(..., alias="capital-loss")
-    hours_per_week: int = Field(..., alias="hours-per-week")
-    native_country: str = Field(..., alias="native-country")
-
-    class Config:
-        allow_population_by_field_name = True
-        schema_extra = {
+    model_config = ConfigDict(
+        validate_by_name=True,
+        json_schema_extra={
             "example": {
                 "age": 39,
                 "workclass": "State-gov",
@@ -48,12 +33,30 @@ class CensusIn(BaseModel):
                 "hours-per-week": 40,
                 "native-country": "United-States",
             }
-        }
+        },
+    )
+
+    age: int
+    workclass: str = Field(..., alias="workclass")
+    fnlgt: int = Field(..., alias="fnlgt")
+    education: str = Field(..., alias="education")
+    education_num: int = Field(..., alias="education-num")
+    marital_status: str = Field(..., alias="marital-status")
+    occupation: str = Field(..., alias="occupation")
+    relationship: str = Field(..., alias="relationship")
+    race: str = Field(..., alias="race")
+    sex: str = Field(..., alias="sex")
+    capital_gain: int = Field(..., alias="capital-gain")
+    capital_loss: int = Field(..., alias="capital-loss")
+    hours_per_week: int = Field(..., alias="hours-per-week")
+    native_country: str = Field(..., alias="native-country")
 
 
-@app.on_event("startup")
-def startup_event():
-    # Train/load model into module-level state
+def ensure_model_loaded():
+    """Load model artifacts if they have not been initialized yet."""
+    if hasattr(app.state, "model") and app.state.model is not None:
+        return
+
     # If running in deterministic/test mode, skip training to keep startup fast
     if os.environ.get("DETERMINISTIC") == "1":
         app.state.model = None
@@ -116,6 +119,11 @@ def startup_event():
     app.state.lb = lb
 
 
+@app.on_event("startup")
+def startup_event():
+    ensure_model_loaded()
+
+
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Census prediction API"}
@@ -148,6 +156,7 @@ def predict(payload: CensusIn):
     }
     df = pd.DataFrame([row])
 
+    ensure_model_loaded()
     model_obj = app.state.model
     if model_obj is None:
         # fallback rule
@@ -156,7 +165,7 @@ def predict(payload: CensusIn):
 
     from starter.ml.data import process_data
 
-    X, y, _, _ = process_data(
+    X, _, _, _ = process_data(
         df,
         categorical_features=[
             "workclass",
@@ -168,7 +177,7 @@ def predict(payload: CensusIn):
             "sex",
             "native-country",
         ],
-        label="salary",
+        label=None,
         training=False,
         encoder=app.state.encoder,
         lb=app.state.lb,
