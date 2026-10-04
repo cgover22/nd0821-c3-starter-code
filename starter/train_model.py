@@ -11,8 +11,8 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from starter.ml.data import process_data
-from starter.ml.model import (
+from starter.ml.data import process_data  # noqa: E402
+from starter.ml.model import (  # noqa: E402
     compute_model_metrics,
     inference,
     save_model,
@@ -95,7 +95,9 @@ def main(
     test_size=0.2,
     random_state=42,
 ):
-    """Train the model from a CSV file and save the model plus preprocessor artifacts."""
+    """Train the model from a CSV file and save the model plus
+    preprocessor artifacts.
+    """
     if categorical_features is None:
         categorical_features = DEFAULT_CATEGORICAL_FEATURES
 
@@ -135,11 +137,31 @@ def main(
 
 
 def _parse_args():
-    parser = argparse.ArgumentParser(description="Train the Census income model.")
-    parser.add_argument("--data-path", default="data/census.csv", help="Path to the input CSV file.")
-    parser.add_argument("--output-dir", default="model", help="Directory for saved model artifacts.")
-    parser.add_argument("--test-size", type=float, default=0.2, help="Proportion of the data to reserve for testing.")
-    parser.add_argument("--random-state", type=int, default=42, help="Random state for train/test split.")
+    parser = argparse.ArgumentParser(
+        description="Train the Census income model."
+    )
+    parser.add_argument(
+        "--data-path",
+        default="data/census.csv",
+        help="Path to the input CSV file.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default="model",
+        help="Directory for saved model artifacts.",
+    )
+    parser.add_argument(
+        "--test-size",
+        type=float,
+        default=0.2,
+        help="Proportion of the data to reserve for testing.",
+    )
+    parser.add_argument(
+        "--random-state",
+        type=int,
+        default=42,
+        help="Random state for train/test split.",
+    )
     return parser.parse_args()
 
 
@@ -174,5 +196,8 @@ if __name__ == "__main__":
     )
     print(f"Saved slice metrics to {slice_output_path}")
     for key, (precision, recall, fbeta) in slice_results.items():
-        print(f"{key}: precision={precision:.4f}, recall={recall:.4f}, fbeta={fbeta:.4f}")
+        print(
+            f"{key}: precision={precision:.4f}, "
+            f"recall={recall:.4f}, fbeta={fbeta:.4f}"
+        )
     print(result["metrics"])

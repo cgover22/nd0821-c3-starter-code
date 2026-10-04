@@ -279,7 +279,9 @@ def test_write_slice_metrics_writes_output_file(tmp_path):
 
     assert isinstance(results, dict)
     assert output_path.exists()
-    assert any("education=" in line for line in output_path.read_text().splitlines())
+    assert any(
+        "education=" in line for line in output_path.read_text().splitlines()
+    )
 
 
 def test_training_script_accepts_data_path_and_saves_artifacts(tmp_path):
@@ -288,7 +290,12 @@ def test_training_script_accepts_data_path_and_saves_artifacts(tmp_path):
     data_path = "data/census.csv"
     output_dir = tmp_path / "artifacts"
 
-    result = main(data_path=data_path, output_dir=str(output_dir), test_size=0.2, random_state=42)
+    result = main(
+        data_path=data_path,
+        output_dir=str(output_dir),
+        test_size=0.2,
+        random_state=42,
+    )
 
     assert result["metrics"]["precision"] >= 0.0
     assert result["metrics"]["recall"] >= 0.0
