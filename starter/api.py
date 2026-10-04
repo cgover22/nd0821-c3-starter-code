@@ -2,6 +2,7 @@
 
 # flake8: noqa
 import os
+import joblib
 import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
@@ -59,6 +60,17 @@ def startup_event():
         app.state.encoder = None
         app.state.lb = None
         return
+
+    model_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "model", "model.joblib"))
+    encoder_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "model", "encoder.joblib"))
+    lb_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "model", "lb.joblib"))
+
+    if all(os.path.exists(path) for path in [model_path, encoder_path, lb_path]):
+        app.state.model = joblib.load(model_path)
+        app.state.encoder = joblib.load(encoder_path)
+        app.state.lb = joblib.load(lb_path)
+        return
+
     data_path = os.path.join(os.path.dirname(__file__), "..", "data", "census.csv")
     data_path = os.path.normpath(data_path)
     try:
@@ -93,7 +105,11 @@ def startup_event():
     clf = ml_model.train_model(X, y)
     ml_model.save_model(
         clf,
-        path=os.path.join(os.path.dirname(__file__), "..", "model", "model.joblib"),
+        path=model_path,
+        encoder=encoder,
+        lb=lb,
+        encoder_path=encoder_path,
+        lb_path=lb_path,
     )
     app.state.model = clf
     app.state.encoder = encoder

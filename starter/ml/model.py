@@ -71,17 +71,45 @@ def inference(model, X):
     return preds
 
 
-def save_model(model, path="model/model.joblib"):
-    """Save trained model to disk.
+def save_model(
+    model,
+    path="model/model.joblib",
+    encoder=None,
+    lb=None,
+    encoder_path=None,
+    lb_path=None,
+):
+    """Save trained model and optional preprocessing artifacts to disk.
 
-    Creates parent directory if needed.
-    Returns the path saved to.
+    Creates parent directories if needed and saves the fitted encoder and label
+    binarizer alongside the model when provided. Returns the model path.
     """
     dirpath = os.path.dirname(path)
     if dirpath and not os.path.exists(dirpath):
         os.makedirs(dirpath, exist_ok=True)
+
     joblib.dump(model, path)
+
+    if encoder is not None:
+        enc_path = encoder_path or os.path.join(dirpath, "encoder.joblib")
+        joblib.dump(encoder, enc_path)
+    if lb is not None:
+        lb_file_path = lb_path or os.path.join(dirpath, "lb.joblib")
+        joblib.dump(lb, lb_file_path)
+
     return path
+
+
+def load_model_artifacts(
+    model_path="model/model.joblib",
+    encoder_path="model/encoder.joblib",
+    lb_path="model/lb.joblib",
+):
+    """Load the saved model and its preprocessing artifacts from disk."""
+    model_obj = joblib.load(model_path)
+    encoder = joblib.load(encoder_path)
+    lb = joblib.load(lb_path)
+    return model_obj, encoder, lb
 
 
 def evaluate_slices(

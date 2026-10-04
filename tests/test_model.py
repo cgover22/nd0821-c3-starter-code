@@ -110,9 +110,29 @@ def test_save_model(tmp_path):
     )
     clf = model.train_model(X, y)
     out = tmp_path / "out_model.joblib"
-    path = model.save_model(clf, path=str(out))
+    encoder_out = tmp_path / "encoder.joblib"
+    lb_out = tmp_path / "lb.joblib"
+    path = model.save_model(
+        clf,
+        path=str(out),
+        encoder=encoder,
+        lb=lb,
+        encoder_path=str(encoder_out),
+        lb_path=str(lb_out),
+    )
     assert path == str(out)
     assert out.exists()
+    assert encoder_out.exists()
+    assert lb_out.exists()
+
+    loaded_model, loaded_encoder, loaded_lb = model.load_model_artifacts(
+        model_path=str(out),
+        encoder_path=str(encoder_out),
+        lb_path=str(lb_out),
+    )
+    assert loaded_model is not None
+    assert loaded_encoder is not None
+    assert loaded_lb is not None
 
 
 def test_evaluate_slices_returns_entries():

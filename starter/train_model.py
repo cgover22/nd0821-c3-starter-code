@@ -43,7 +43,12 @@ def main():
     )
 
     clf = train_model(X_train, y_train)
-    save_model(clf, path="model/model.joblib")
+    save_model(
+        clf,
+        path="model/model.joblib",
+        encoder=encoder,
+        lb=lb,
+    )
 
 
 if __name__ == "__main__":
