@@ -58,3 +58,5 @@ The training script and API are exercises to complete. Once implemented, run the
     * Hint: development in Python is fast! But how fast you can iterate slows down if you rely on your CI/CD to fail before fixing an issue. I like to run flake8 locally before I commit changes.
     * Note: Install flake8 separately if needed: `pip install flake8`
 * Write a script that uses the requests module to do one POST on your live API.
+
+GitHub Repo: https://github.com/cgover22/nd0821-c3-starter-code

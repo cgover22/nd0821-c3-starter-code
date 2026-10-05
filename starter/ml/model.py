@@ -157,3 +157,56 @@ def evaluate_slices(
             precision, recall, fbeta = compute_model_metrics(y_slice, preds)
             results[f"{cat}={val}"] = (precision, recall, fbeta)
     return results
+
+
+def write_slice_metrics(
+    model,
+    data: pd.DataFrame,
+    categorical_feature,
+    label,
+    output_path="slice_output.txt",
+    categorical_features=None,
+    encoder=None,
+    lb=None,
+):
+    """Compute and write model metrics for each slice of one categorical feature.
+
+    The output file contains one line per category value in the form
+    "feature=value: precision=..., recall=..., fbeta=...".
+    """
+    if categorical_features is None:
+        categorical_features = [
+            col
+            for col in data.select_dtypes(include=["object", "category", "string"]).columns
+            if col != label
+        ]
+    elif isinstance(categorical_features, str):
+        categorical_features = [categorical_features]
+
+    all_results = evaluate_slices(
+        model,
+        data,
+        categorical_features=categorical_features,
+        label=label,
+        encoder=encoder,
+        lb=lb,
+    )
+    results = {key: value for key, value in all_results.items() if key.startswith(f"{categorical_feature}=")}
+
+    output_path = str(output_path)
+    dirpath = os.path.dirname(output_path)
+    if dirpath and not os.path.exists(dirpath):
+        os.makedirs(dirpath, exist_ok=True)
+
+    lines = []
+    for key, (precision, recall, fbeta) in results.items():
+        lines.append(
+            f"{key}: precision={precision:.4f}, recall={recall:.4f}, fbeta={fbeta:.4f}"
+        )
+
+    with open(output_path, "w", encoding="utf-8") as file:
+        file.write("\n".join(lines))
+        if lines:
+            file.write("\n")
+
+    return results

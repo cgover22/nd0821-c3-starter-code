@@ -9,8 +9,7 @@ client = TestClient(app)
 def test_get_root():
     r = client.get("/")
     assert r.status_code == 200
-    data = r.json()
-    assert "message" in data
+    assert r.json() == {"message": "Welcome to the Census prediction API"}
 
 
 def make_payload(age):
@@ -47,3 +46,22 @@ def test_post_predict_higher():
     r = client.post("/predict", json=payload)
     assert r.status_code == 200
     assert r.json()["prediction"] == ">50K"
+
+
+def test_post_predict_real_model_path():
+    os.environ.pop("DETERMINISTIC", None)
+    payload = make_payload(age=39)
+    r = client.post("/predict", json=payload)
+    assert r.status_code == 200
+    assert r.json()["prediction"] in {">50K", "<=50K"}
+
+
+def test_openapi_includes_example_payload():
+    schema = app.openapi()
+    payload = schema["components"]["schemas"]["CensusIn"]["example"]
+
+    assert payload["age"] == 39
+    assert payload["workclass"] == "State-gov"
+    assert payload["fnlgt"] == 77516
+    assert payload["education"] == "Bachelors"
+    assert payload["native-country"] == "United-States"
