@@ -178,12 +178,6 @@ Thumbs.db
 temp/
 tmp/
 
-# Screenshots (unless specifically needed)
-screenshots/*.png
-screenshots/*.jpg
-screenshots/*.jpeg
-!screenshots/.gitkeep
-
 # API keys and secrets
 *.key
 *.pem
