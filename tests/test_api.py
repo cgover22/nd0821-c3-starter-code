@@ -31,29 +31,43 @@ def make_payload(age):
     }
 
 
-def test_post_predict_lower():
-    # Use deterministic fallback rule during tests
-    os.environ["DETERMINISTIC"] = "1"
-    payload = make_payload(age=30)
+def test_post_predict_lower_with_real_model():
+    os.environ.pop("DETERMINISTIC", None)
+    app.state.model = None
+    app.state.encoder = None
+    app.state.lb = None
+
+    payload = make_payload(age=20)
+    payload["hours-per-week"] = 20
+    payload["capital-gain"] = 0
+    payload["capital-loss"] = 0
+    payload["education"] = "Bachelors"
+    payload["marital-status"] = "Never-married"
+
     r = client.post("/predict", json=payload)
     assert r.status_code == 200
     assert r.json()["prediction"] == "<=50K"
 
 
-def test_post_predict_higher():
-    os.environ["DETERMINISTIC"] = "1"
-    payload = make_payload(age=70)
+def test_post_predict_higher_with_real_model():
+    os.environ.pop("DETERMINISTIC", None)
+    app.state.model = None
+    app.state.encoder = None
+    app.state.lb = None
+
+    payload = make_payload(age=52)
+    payload["education"] = "Masters"
+    payload["education-num"] = 14
+    payload["marital-status"] = "Married-civ-spouse"
+    payload["occupation"] = "Exec-managerial"
+    payload["relationship"] = "Husband"
+    payload["capital-gain"] = 5000
+    payload["capital-loss"] = 0
+    payload["hours-per-week"] = 60
+
     r = client.post("/predict", json=payload)
     assert r.status_code == 200
     assert r.json()["prediction"] == ">50K"
-
-
-def test_post_predict_real_model_path():
-    os.environ.pop("DETERMINISTIC", None)
-    payload = make_payload(age=39)
-    r = client.post("/predict", json=payload)
-    assert r.status_code == 200
-    assert r.json()["prediction"] in {">50K", "<=50K"}
 
 
 def test_openapi_includes_example_payload():
