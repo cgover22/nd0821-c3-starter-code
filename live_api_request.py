@@ -5,7 +5,7 @@ import requests
 
 API_URL = os.environ.get(
     "LIVE_API_URL",
-    "https://your-live-api-url.herokuapp.com/predict",
+    "https://nd0821-c3-starter-code-cfx8.onrender.com/predict",
 )
 
 PAYLOAD = {

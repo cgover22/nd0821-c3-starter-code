@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import pytest
 from sklearn.ensemble import RandomForestClassifier
 from starter.ml import model
 from starter.ml.data import process_data
@@ -213,37 +214,39 @@ def test_save_model(tmp_path):
 
 
 def test_evaluate_slices_returns_entries():
-    df = make_dummy_data()
-    cat_features = [
-        "workclass",
-        "education",
-        "marital-status",
-        "occupation",
-        "relationship",
-        "race",
-        "sex",
-        "native-country",
-    ]
-    X, y, encoder, lb = process_data(
-        df,
-        categorical_features=cat_features,
-        label="salary",
+    y = np.array([1, 1, 0, 0])
+    preds = np.array([1, 0, 0, 0])
+    precision, recall, fbeta = model.compute_model_metrics(y, preds)
+    assert precision == pytest.approx(1.0)
+    assert recall == pytest.approx(0.5)
+    assert fbeta == pytest.approx(2 / 3)
+
+    slice_df = pd.DataFrame(
+        {
+            "group": ["A", "A", "B", "B"],
+            "label": [1, 1, 0, 0],
+        }
+    )
+    X, y_slice, encoder, lb = process_data(
+        slice_df,
+        categorical_features=["group"],
+        label="label",
         training=True,
     )
-    clf = model.train_model(X, y)
+    clf = model.train_model(X, y_slice)
     results = model.evaluate_slices(
         clf,
-        df,
-        categorical_features=cat_features,
-        label="salary",
+        slice_df,
+        categorical_features=["group"],
+        label="label",
         encoder=encoder,
         lb=lb,
     )
-    # Should contain at least one slice key
+
     assert isinstance(results, dict)
-    assert len(results) > 0
-    # keys should look like feature=value
-    assert any("=" in k for k in results.keys())
+    assert len(results) == 2
+    assert results["group=A"] == pytest.approx((1.0, 1.0, 1.0))
+    assert results["group=B"] == pytest.approx((1.0, 1.0, 1.0))
 
 
 def test_write_slice_metrics_writes_output_file(tmp_path):
@@ -297,9 +300,9 @@ def test_training_script_accepts_data_path_and_saves_artifacts(tmp_path):
         random_state=42,
     )
 
-    assert result["metrics"]["precision"] >= 0.0
-    assert result["metrics"]["recall"] >= 0.0
-    assert result["metrics"]["fbeta"] >= 0.0
+    assert result["metrics"]["precision"] == pytest.approx(0.7418639053254438)
+    assert result["metrics"]["recall"] == pytest.approx(0.6384468491406747)
+    assert result["metrics"]["fbeta"] == pytest.approx(0.6862812179267875)
     assert (output_dir / "model.joblib").exists()
     assert (output_dir / "encoder.joblib").exists()
     assert (output_dir / "lb.joblib").exists()
